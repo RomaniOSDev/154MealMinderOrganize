@@ -1,0 +1,6 @@
+framework module Pods_154MealMinderOrganize {
+  umbrella header "Pods-154MealMinderOrganize-umbrella.h"
+
+  export *
+  module * { export * }
+}
