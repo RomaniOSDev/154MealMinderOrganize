@@ -8,7 +8,7 @@ workflows:
           XCODE_WORKSPACE: "154MealMinderOrganize.xcworkspace"
           XCODE_SCHEME: "154MealMinderOrganize"
           BUNDLE_ID: "com.fre.tr7lb2rgr0v1rstr"
-          EXTENSION_BUNDLE_ID: "com.hal.dfrh80sl93s.NotificationServiceExtension"
+          EXTENSION_BUNDLE_ID: "com.fre.tr7lb2rgr0v1rstr.NotificationServiceExtension"
           APP_STORE_APP_ID: 6765863457
         xcode: latest
         cocoapods: 1.14.2
