@@ -8,8 +8,8 @@ workflows:
           XCODE_WORKSPACE: "154MealMinderOrganize.xcworkspace"
           XCODE_SCHEME: "154MealMinderOrganize"
           BUNDLE_ID: "com.fre.tr7lb2rgr0v1rstr"
-         
-          APP_STORE_APP_ID: 6762079699
+          EXTENSION_BUNDLE_ID: "com.hal.dfrh80sl93s.NotificationServiceExtension"
+          APP_STORE_APP_ID: 6765863457
         xcode: latest
         cocoapods: 1.14.2
       scripts:
@@ -25,7 +25,7 @@ workflows:
         - name: Fetch signing files
           script: |
             app-store-connect fetch-signing-files $BUNDLE_ID --type IOS_APP_STORE --create
-          
+            app-store-connect fetch-signing-files $EXTENSION_BUNDLE_ID --type IOS_APP_STORE --create
         - name: Use system default keychain
           script: |
             keychain add-certificates
