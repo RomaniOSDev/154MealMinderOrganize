@@ -109,13 +109,16 @@ final class AppsFlyerManager: NSObject {
     private func performConversionDataRetry() {
         AppsFlyerLib.shared().start(completionHandler: { [weak self] dictionary, error in
             DispatchQueue.main.async {
-                if let dict = dictionary, !dict.isEmpty {
-                    self?.applyConversionData(dict as [AnyHashable: Any])
-                } else if let data = self?.currentConversionData {
-                    // Если повторный вызов не вернул данные — сохраняем то, что было (Organic)
-                    self?.mergeAndSaveConversionString()
+                guard let self else { return }
+                // Completion start() возвращает ответ launch-запроса, а не conversion data.
+                // Применяем словарь только если это реальная атрибуция (есть af_status).
+                if let dict = dictionary as? [AnyHashable: Any], dict["af_status"] != nil {
+                    self.applyConversionData(dict)
+                } else if self.currentConversionData != nil {
+                    // Если повторный вызов не вернул данные конверсии — сохраняем то, что было (Organic)
+                    self.mergeAndSaveConversionString()
                 }
-                self?.isRetryScheduled = false
+                self.isRetryScheduled = false
             }
         })
     }
@@ -162,6 +165,28 @@ final class AppsFlyerManager: NSObject {
         conversionDataString = string
         conversionDataUpdatedAt = Date().timeIntervalSince1970
         NotificationCenter.default.post(name: .appsFlyerConversionDataReady, object: nil)
+    }
+
+    /// Повторный запуск SDK для получения conversion data (после появления сети в той же сессии).
+    func restartConversionFetch() {
+        AppsFlyerLib.shared().start(completionHandler: { [weak self] dictionary, error in
+            DispatchQueue.main.async {
+                guard let self else { return }
+                // Completion start() возвращает ответ launch-запроса, а не conversion data.
+                // Принимаем словарь только если это реальная атрибуция (есть af_status);
+                // иначе ждём делегат onConversionDataSuccess — SDK вызовет его сам.
+                if let dict = dictionary as? [AnyHashable: Any], dict["af_status"] != nil {
+                    self.handleConversionDataSuccess(dict)
+                }
+            }
+        })
+    }
+
+    /// Сбрасывает сохранённые conversion data, если они устарели (старше указанного окна).
+    /// Используется после восстановления сети, чтобы конфиг ушёл со свежей атрибуцией.
+    func clearConversionDataIfStale(olderThan seconds: TimeInterval) {
+        guard !hasFreshConversionData(within: seconds) else { return }
+        clearStoredConversionString()
     }
 
     /// Сброс сохранённой строки (например для тестов).
